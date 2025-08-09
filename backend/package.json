@@ -1,0 +1,22 @@
+{
+  "name": "ai-dev-platform-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
+    "openai": "^4.20.0",
+    "uuid": "^9.0.0",
+    "ws": "^8.13.0"
+  }
+}
+

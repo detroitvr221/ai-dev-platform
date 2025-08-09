@@ -1,0 +1,21 @@
+{
+  "build": {
+    "builder": "DOCKERFILE"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3,
+    "healthcheckPath": "/api/health",
+    "port": 3001
+  },
+  "envs": {
+    "OPENAI_API_KEY": { "required": true },
+    "PORT": { "value": "3001" },
+    "PROJECTS_DIR": { "value": "/data/projects" }
+  },
+  "volumes": [
+    { "name": "data", "mountPath": "/data" }
+  ]
+}
+
