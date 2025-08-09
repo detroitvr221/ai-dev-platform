@@ -34,15 +34,24 @@ export class BaseAgent {
       this.client = new OpenAI({ apiKey });
     }
     const msgs = this._getMessages(context);
-    msgs.push({ role: 'user', content: message });
-    const response = await this.client.chat.completions.create({
-      model: this.model,
-      messages: msgs,
-      temperature: 0.2,
-    });
-    const assistantMessage = response.choices?.[0]?.message?.content || '';
-    this._pushMessage(context, 'assistant', assistantMessage);
-    return this._normalizeResponse(assistantMessage);
+    msgs.push({ role: 'user', content: this._augmentWithContext(message, context) });
+    let lastErr = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const response = await this.client.chat.completions.create({
+          model: this.model,
+          messages: msgs,
+          temperature: Number(process.env.OPENAI_TEMPERATURE || 0.2),
+          max_tokens: Number(process.env.OPENAI_MAX_TOKENS || 2000)
+        });
+        const assistantMessage = response.choices?.[0]?.message?.content || '';
+        this._pushMessage(context, 'assistant', assistantMessage);
+        return this._normalizeResponse(assistantMessage);
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr || new Error('OpenAI request failed');
   }
 
   _normalizeResponse(text) {
@@ -58,6 +67,14 @@ export class BaseAgent {
       // ignore
     }
     return { type: 'text', data: text, raw: text };
+  }
+
+  _augmentWithContext(message, context) {
+    const pieces = [String(message || '')];
+    if (context?.projectSummary) {
+      pieces.push(`\n\n[PROJECT_SUMMARY]\n${JSON.stringify(context.projectSummary).slice(0, 4000)}`);
+    }
+    return pieces.join('');
   }
 }
 

@@ -21,7 +21,8 @@ export class AgentOrchestrator {
   }
 
   async processUserMessage(message, projectId, updateCallback) {
-    const context = { projectId };
+    const projectSummary = await this.projectManager.getProjectSummary(projectId).catch(() => null);
+    const context = { projectId, projectSummary };
     const lower = message.toLowerCase();
 
     const sendUpdate = (agent, status, msg, data) => {
@@ -92,7 +93,11 @@ export class AgentOrchestrator {
     const files = this._extractFilesFromResponse(result.raw || '');
     if (files.length) {
       for (const f of files) {
-        await this.projectManager.writeFile(context.projectId, f.path.replace(/^\/?/, ''), f.content);
+        try {
+          await this.projectManager.writeFile(context.projectId, f.path.replace(/^\/?/, ''), f.content);
+        } catch (e) {
+          sendUpdate(agentKey, 'error', `Failed to write ${f.path}: ${e.message}`);
+        }
       }
       sendUpdate(agentKey, 'completed', `${files.length} files written`, { files });
     } else {

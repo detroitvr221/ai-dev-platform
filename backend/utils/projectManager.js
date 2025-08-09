@@ -89,10 +89,39 @@ export class ProjectManager {
   }
 
   async writeFile(projectId, filePath, content) {
-    const fullPath = path.join(this.rootDir, projectId, filePath);
+    const safe = this._sanitizeRelativePath(filePath);
+    if (!safe) throw new Error(`Invalid file path: ${filePath}`);
+    const fullPath = path.join(this.rootDir, projectId, safe);
     await fs.ensureDir(path.dirname(fullPath));
-    await fs.writeFile(fullPath, content ?? '', 'utf-8');
+    const maxBytes = Number(process.env.MAX_FILE_WRITE_BYTES || 2 * 1024 * 1024); // 2MB default
+    const buffer = Buffer.from(String(content ?? ''), 'utf-8');
+    if (buffer.byteLength > maxBytes) throw new Error(`File too large (${buffer.byteLength} bytes)`);
+    await fs.writeFile(fullPath, buffer);
     return true;
+  }
+
+  _sanitizeRelativePath(rel) {
+    if (!rel || typeof rel !== 'string') return null;
+    const normalized = rel.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (normalized.includes('..')) return null;
+    return normalized;
+  }
+
+  async getProjectSummary(projectId) {
+    const base = path.join(this.rootDir, projectId);
+    const files = [];
+    const walk = async (dir) => {
+      const entries = await fs.readdir(dir);
+      for (const name of entries) {
+        const full = path.join(dir, name);
+        const rel = path.relative(base, full).replace(/\\/g, '/');
+        const stats = await fs.stat(full);
+        if (stats.isDirectory()) await walk(full);
+        else files.push({ path: rel, bytes: stats.size });
+      }
+    };
+    await walk(base);
+    return { files };
   }
 }
 

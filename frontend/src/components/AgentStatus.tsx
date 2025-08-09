@@ -4,15 +4,17 @@ import { useWebSocket } from '../hooks/useWebSocket';
 export function AgentStatus() {
   const { agentUpdates, fileEvents } = useWebSocket();
   return (
-    <div style={{ padding: 8, borderTop: '1px solid #eee', overflow: 'auto' }}>
-      <div style={{ fontWeight: 600, marginBottom: 6 }}>Agent Activity</div>
-      <div style={{ maxHeight: 220, overflow: 'auto', fontSize: 12 }}>
+    <div className="p-2 border-t overflow-auto bg-white">
+      <div className="font-semibold mb-1">Agent Activity</div>
+      <div className="max-h-56 overflow-auto text-xs space-y-1">
         {agentUpdates.slice(-50).map((u, idx) => (
-          <div key={idx}>[{u.agent}] {u.status}: {u.message}</div>
+          <div key={idx} className="whitespace-pre-wrap">
+            <span className="font-medium">[{u.agent}]</span> {u.status}: {u.message}
+          </div>
         ))}
-        <div style={{ marginTop: 8, fontWeight: 600 }}>File Events</div>
+        <div className="mt-2 font-semibold">File Events</div>
         {fileEvents.slice(-50).map((e, idx) => (
-          <div key={idx}>{e.event} {e.projectId}/{e.filePath}</div>
+          <div key={idx} className="whitespace-pre-wrap">{e.event} {e.projectId}/{e.filePath}</div>
         ))}
       </div>
     </div>
