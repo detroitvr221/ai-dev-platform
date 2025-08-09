@@ -4,10 +4,12 @@ import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import chokidar from 'chokidar';
 import { ProjectManager } from './utils/projectManager.js';
-import { AgentOrchestrator } from './agents/orchestrator.js';
+// Defer orchestrator import to avoid startup failures if agents have issues
+let orchestrator = null;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +25,13 @@ const projectsRoot = process.env.PROJECTS_DIR
   ? path.resolve(process.env.PROJECTS_DIR)
   : path.resolve(__dirname, '../projects');
 const projectManager = new ProjectManager(projectsRoot);
-const orchestrator = new AgentOrchestrator({ projectManager });
+async function getOrchestrator() {
+  if (!orchestrator) {
+    const mod = await import('./agents/orchestrator.js');
+    orchestrator = new mod.AgentOrchestrator({ projectManager });
+  }
+  return orchestrator;
+}
 
 // API routes
 app.get('/api/health', (_req, res) => {
@@ -78,11 +86,9 @@ app.use(express.static(staticDir));
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
   const indexPath = path.join(staticDir, 'index.html');
-  import('fs').then(({ default: fs }) => {
-    fs.access(indexPath, (err) => {
-      if (!err) return res.sendFile(indexPath);
-      return res.status(200).send('Backend is running. In development use http://localhost:5173 for the frontend.');
-    });
+  fs.access(indexPath, (err) => {
+    if (!err) return res.sendFile(indexPath);
+    return res.status(200).send('Backend is running. In development use http://localhost:5173 for the frontend.');
   });
 });
 
@@ -116,7 +122,8 @@ wss.on('connection', (ws) => {
             ws.send(JSON.stringify({ type: 'agent_update', ...update }));
           }
         };
-        await orchestrator.processUserMessage(String(text || ''), String(projectId || ''), updateCallback);
+        const orch = await getOrchestrator();
+        await orch.processUserMessage(String(text || ''), String(projectId || ''), updateCallback);
       }
     } catch (err) {
       console.error('WS message error', err);
