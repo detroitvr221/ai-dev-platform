@@ -1,11 +1,11 @@
 import OpenAI from 'openai';
 
 export class BaseAgent {
-  constructor({ name, role, systemPrompt, model = 'gpt-4o-mini' }) {
+  constructor({ name, role, systemPrompt, model }) {
     this.name = name;
     this.role = role;
     this.systemPrompt = systemPrompt;
-    this.model = model;
+    this.model = model || process.env.OPENAI_MODEL || 'gpt-5-nano';
     this.client = null; // Lazy init to avoid crashing server when no API key is set
     this.memories = new Map(); // key: conversationId or projectId -> messages[]
   }

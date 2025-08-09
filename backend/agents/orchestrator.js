@@ -11,12 +11,12 @@ export class AgentOrchestrator {
   constructor({ projectManager }) {
     this.projectManager = projectManager;
     this.agents = {
-      planning: new PlanningAgent({ systemPrompt: agentSystemPrompts.planning }),
-      frontend: new FrontendAgent({ systemPrompt: agentSystemPrompts.frontend }),
-      backend: new BackendAgent({ systemPrompt: agentSystemPrompts.backend }),
-      database: new DatabaseAgent({ systemPrompt: agentSystemPrompts.database }),
-      testing: new TestingAgent({ systemPrompt: agentSystemPrompts.testing }),
-      devops: new DevopsAgent({ systemPrompt: agentSystemPrompts.devops }),
+      planning: new PlanningAgent({ systemPrompt: agentSystemPrompts.planning, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
+      frontend: new FrontendAgent({ systemPrompt: agentSystemPrompts.frontend, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
+      backend: new BackendAgent({ systemPrompt: agentSystemPrompts.backend, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
+      database: new DatabaseAgent({ systemPrompt: agentSystemPrompts.database, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
+      testing: new TestingAgent({ systemPrompt: agentSystemPrompts.testing, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
+      devops: new DevopsAgent({ systemPrompt: agentSystemPrompts.devops, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
     };
   }
 
@@ -40,8 +40,20 @@ export class AgentOrchestrator {
 
     // Always get/refresh plan context first for other intents
     sendUpdate('planning', 'started', 'Planning for task');
-    const plan = await this.agents.planning.sendMessage(`Plan for: ${message}. Return tasks JSON.`, context);
+    const plan = await this.agents.planning.sendMessage(
+      `Create a project plan for: ${message}. Ensure tasks include assignee among [frontend,backend,database,testing,devops,planning] and dependencies.`,
+      context
+    );
     sendUpdate('planning', 'completed', 'Plan ready', plan);
+
+    // If the plan contains tasks, route them to respective agents in dependency order (simple pass for now)
+    const tasks = (plan?.data?.tasks || []).filter(Boolean);
+    const ordered = tasks; // TODO: topological sort by dependsOn
+    for (const t of ordered) {
+      const agentKey = t.assignee || this._detectIntent(t.title + ' ' + t.description);
+      if (!this.agents[agentKey]) continue;
+      await this._runAgentThatMayWriteFiles(agentKey, `${t.title}\n${t.description}`, context, sendUpdate);
+    }
 
     if (intent === 'frontend') {
       await this._runAgentThatMayWriteFiles('frontend', message, context, sendUpdate);
