@@ -3,6 +3,7 @@ import { FileExplorer } from './FileExplorer';
 import { CodeEditor } from './CodeEditor';
 import { ChatInterface } from './ChatInterface';
 import { AgentStatus } from './AgentStatus';
+import { PreviewPane } from './PreviewPane';
 
 export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi }: {
   selectedProjectId: string | null;
@@ -47,7 +48,11 @@ export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi 
         <AgentStatus />
       </div>
       <div style={{ borderLeft: '1px solid #eee' }}>
-        <ChatInterface selectedProjectId={selectedProjectId} />
+        {selectedProjectId ? (
+          <PreviewPane projectId={selectedProjectId} projectApi={projectApi} />
+        ) : (
+          <ChatInterface selectedProjectId={selectedProjectId} />
+        )}
       </div>
     </div>
   );

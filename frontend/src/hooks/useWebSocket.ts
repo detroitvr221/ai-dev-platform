@@ -1,9 +1,11 @@
 import React from 'react';
 
-type Update = { agent: string; status: string; message?: string; data?: any };
+type AgentUpdate = { agent: string; status: string; message?: string; data?: any };
+type FileEvent = { type?: 'file_event'; event: string; projectId: string; filePath: string };
 
 let socket: WebSocket | null = null;
-const subscribers = new Set<React.Dispatch<React.SetStateAction<Update[]>>>();
+const agentSubscribers = new Set<React.Dispatch<React.SetStateAction<AgentUpdate[]>>>();
+const fileSubscribers = new Set<React.Dispatch<React.SetStateAction<FileEvent[]>>>();
 
 function ensureSocket() {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return socket;
@@ -21,19 +23,26 @@ function ensureSocket() {
   socket.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     if (msg.type === 'agent_update') {
-      for (const sub of subscribers) sub((prev) => [...prev, { agent: msg.agent, status: msg.status, message: msg.message, data: msg.data }]);
+      for (const sub of agentSubscribers) sub((prev) => [...prev, { agent: msg.agent, status: msg.status, message: msg.message, data: msg.data }]);
+    }
+    if (msg.type === 'file_event') {
+      const fe: FileEvent = { type: 'file_event', event: msg.event, projectId: msg.projectId, filePath: msg.filePath };
+      for (const sub of fileSubscribers) sub((prev) => [...prev, fe]);
     }
   };
   return socket;
 }
 
 export function useWebSocket() {
-  const [agentUpdates, setAgentUpdates] = React.useState<Update[]>([]);
+  const [agentUpdates, setAgentUpdates] = React.useState<AgentUpdate[]>([]);
+  const [fileEvents, setFileEvents] = React.useState<FileEvent[]>([]);
   React.useEffect(() => {
-    subscribers.add(setAgentUpdates);
+    agentSubscribers.add(setAgentUpdates);
+    fileSubscribers.add(setFileEvents);
     ensureSocket();
     return () => {
-      subscribers.delete(setAgentUpdates);
+      agentSubscribers.delete(setAgentUpdates);
+      fileSubscribers.delete(setFileEvents);
     };
   }, []);
 
@@ -46,6 +55,6 @@ export function useWebSocket() {
     trySend();
   }, []);
 
-  return { agentUpdates, send };
+  return { agentUpdates, fileEvents, send };
 }
 
