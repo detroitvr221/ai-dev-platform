@@ -49,7 +49,7 @@ export class AgentOrchestrator {
 
     // If the plan contains tasks, route them to respective agents in dependency order (simple pass for now)
     const tasks = (plan?.data?.tasks || []).filter(Boolean);
-    const ordered = tasks; // TODO: topological sort by dependsOn
+    const ordered = this._topologicalOrder(tasks);
     for (const t of ordered) {
       const agentKey = t.assignee || this._detectIntent(t.title + ' ' + t.description);
       if (!this.agents[agentKey]) continue;
@@ -82,6 +82,31 @@ export class AgentOrchestrator {
     if (/(test|jest|coverage|integration)/.test(text)) return 'testing';
     if (/(deploy|docker|ci|cd|pipeline|infrastructure)/.test(text)) return 'devops';
     return 'mixed';
+  }
+
+  _topologicalOrder(tasks) {
+    const idToTask = new Map(tasks.map((t) => [t.id || t.title, t]));
+    const visited = new Set();
+    const onStack = new Set();
+    const result = [];
+    const getDeps = (t) => (Array.isArray(t.dependsOn) ? t.dependsOn : []);
+
+    const dfs = (task) => {
+      const key = task.id || task.title;
+      if (visited.has(key)) return;
+      if (onStack.has(key)) return; // cycle guard
+      onStack.add(key);
+      for (const dep of getDeps(task)) {
+        const depTask = idToTask.get(dep);
+        if (depTask) dfs(depTask);
+      }
+      onStack.delete(key);
+      visited.add(key);
+      result.push(task);
+    };
+
+    for (const t of tasks) dfs(t);
+    return result;
   }
 
   async _runAgentThatMayWriteFiles(agentKey, message, context, sendUpdate) {
