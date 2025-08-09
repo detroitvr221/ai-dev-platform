@@ -38,6 +38,22 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
 });
 
+// Simple OpenAI key validation (does not consume significant tokens)
+app.get('/api/validate/openai', async (_req, res) => {
+  try {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return res.status(400).json({ ok: false, error: 'OPENAI_API_KEY not set' });
+    const { default: OpenAI } = await import('openai');
+    const client = new OpenAI({ apiKey });
+    // List models as a lightweight check
+    const models = await client.models.list();
+    const hasAny = Array.isArray(models?.data) && models.data.length > 0;
+    return res.json({ ok: true, models: hasAny ? models.data.slice(0, 3).map((m) => m.id) : [] });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err?.message || 'Unknown error' });
+  }
+});
+
 app.get('/api/projects', async (_req, res) => {
   const projects = await projectManager.listProjects();
   res.json(projects);

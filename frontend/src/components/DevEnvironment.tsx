@@ -3,6 +3,7 @@ import { FileExplorer } from './FileExplorer';
 import { CodeEditor } from './CodeEditor';
 import { ChatInterface } from './ChatInterface';
 import { AgentStatus } from './AgentStatus';
+import { AgentProgress } from './AgentProgress';
 import { PreviewPane } from './PreviewPane';
 
 export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi }: {
@@ -13,7 +14,7 @@ export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi 
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState('');
   const [tree, setTree] = useState<any[]>([]);
-  const [mode, setMode] = useState<'chat' | 'preview'>('chat');
+  const [mode, setMode] = useState<'chat' | 'preview' | 'progress'>('chat');
 
   useEffect(() => {
     if (!selectedProjectId) return;
@@ -52,12 +53,14 @@ export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi 
         <div className="border-b flex gap-2 p-2">
           <Tab label="Chat" activeKey={mode} tabKey="chat" onClick={() => setMode('chat')} />
           <Tab label="Preview" activeKey={mode} tabKey="preview" onClick={() => setMode('preview')} />
+          <Tab label="Progress" activeKey={mode} tabKey="progress" onClick={() => setMode('progress')} />
         </div>
         <div className="h-full">
           {mode === 'chat' && <ChatInterface selectedProjectId={selectedProjectId} />}
           {mode === 'preview' && selectedProjectId && (
             <PreviewPane projectId={selectedProjectId} projectApi={projectApi} />
           )}
+          {mode === 'progress' && <AgentProgress />}
         </div>
       </div>
     </div>
