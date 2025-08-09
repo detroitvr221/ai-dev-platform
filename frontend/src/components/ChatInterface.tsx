@@ -12,17 +12,17 @@ export function ChatInterface({ selectedProjectId }: { selectedProjectId: string
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateRows: '1fr auto' }}>
-      <div style={{ padding: 8, overflow: 'auto' }}>
+    <div className="grid grid-rows-[1fr_auto] h-full">
+      <div className="p-2 overflow-auto space-y-1 text-sm">
         {agentUpdates.map((u, i) => (
-          <div key={i} style={{ fontSize: 12, marginBottom: 6 }}>
+          <div key={i}>
             <strong>[{u.agent}]</strong> {u.status} — {u.message}
           </div>
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 8, padding: 8, borderTop: '1px solid #eee' }}>
-        <input style={{ flex: 1 }} value={input} onChange={(e) => setInput(e.target.value)} placeholder={!selectedProjectId ? 'Create/select a project first' : 'Describe what to build...'} />
-        <button onClick={onSend} disabled={!selectedProjectId || !input.trim()}>Send</button>
+      <div className="flex gap-2 p-2 border-t">
+        <input className="flex-1 border rounded px-2 py-1" value={input} onChange={(e) => setInput(e.target.value)} placeholder={!selectedProjectId ? 'Create/select a project first' : 'Describe what to build...'} />
+        <button className="px-3 py-1 rounded bg-black text-white" onClick={onSend} disabled={!selectedProjectId || !input.trim()}>Send</button>
       </div>
     </div>
   );

@@ -14,10 +14,10 @@ function languageFromPath(filePath: string): string | undefined {
 
 export function CodeEditor({ filePath, value, onChange, onSave }: { filePath: string; value: string; onChange: (v: string) => void; onSave: (v: string) => void }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '6px 8px', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <strong style={{ flex: 1 }}>{filePath || 'No file selected'}</strong>
-        <button onClick={() => onSave(value)}>Save</button>
+    <div className="flex flex-col">
+      <div className="px-2 py-1 border-b flex items-center gap-2 bg-white">
+        <strong className="flex-1 truncate">{filePath || 'No file selected'}</strong>
+        <button className="px-3 py-1 rounded bg-black text-white" onClick={() => onSave(value)}>Save</button>
       </div>
       <div style={{ height: '100%', minHeight: 300 }}>
         <Editor height="100%" language={languageFromPath(filePath)} value={value} onChange={(v) => onChange(v ?? '')} theme="vs-dark" options={{ fontSize: 14 }} />

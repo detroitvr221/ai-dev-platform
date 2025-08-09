@@ -18,5 +18,5 @@ function languageFromPath(filePath) {
     return 'plaintext';
 }
 export function CodeEditor({ filePath, value, onChange, onSave }) {
-    return (_jsxs("div", { style: { display: 'flex', flexDirection: 'column' }, children: [_jsxs("div", { style: { padding: '6px 8px', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 8 }, children: [_jsx("strong", { style: { flex: 1 }, children: filePath || 'No file selected' }), _jsx("button", { onClick: () => onSave(value), children: "Save" })] }), _jsx("div", { style: { height: '100%', minHeight: 300 }, children: _jsx(Editor, { height: "100%", language: languageFromPath(filePath), value: value, onChange: (v) => onChange(v ?? ''), theme: "vs-dark", options: { fontSize: 14 } }) })] }));
+    return (_jsxs("div", { className: "flex flex-col", children: [_jsxs("div", { className: "px-2 py-1 border-b flex items-center gap-2 bg-white", children: [_jsx("strong", { className: "flex-1 truncate", children: filePath || 'No file selected' }), _jsx("button", { className: "px-3 py-1 rounded bg-black text-white", onClick: () => onSave(value), children: "Save" })] }), _jsx("div", { style: { height: '100%', minHeight: 300 }, children: _jsx(Editor, { height: "100%", language: languageFromPath(filePath), value: value, onChange: (v) => onChange(v ?? ''), theme: "vs-dark", options: { fontSize: 14 } }) })] }));
 }

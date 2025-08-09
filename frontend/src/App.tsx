@@ -17,12 +17,18 @@ export function App() {
   }, [projectApi.projects, selectedProjectId]);
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <DevEnvironment
-        selectedProjectId={selectedProjectId}
-        onSelectProject={setSelectedProjectId}
-        projectApi={projectApi}
-      />
+    <div className="h-screen flex flex-col bg-zinc-50 text-zinc-900">
+      <header className="h-12 px-4 flex items-center justify-between bg-white border-b">
+        <div className="font-bold tracking-wide">AI Dev Platform</div>
+        <div className="text-sm opacity-60">Powered by multi-agent orchestration</div>
+      </header>
+      <div className="flex-1">
+        <DevEnvironment
+          selectedProjectId={selectedProjectId}
+          onSelectProject={setSelectedProjectId}
+          projectApi={projectApi}
+        />
+      </div>
     </div>
   );
 }

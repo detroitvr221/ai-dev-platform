@@ -32,28 +32,28 @@ export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi 
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr 360px', height: '100%' }}>
-      <div style={{ borderRight: '1px solid #eee', overflow: 'auto' }}>
-        <div style={{ padding: 8, display: 'flex', gap: 8 }}>
-          <select value={selectedProjectId ?? ''} onChange={(e) => onSelectProject(e.target.value)} style={{ flex: 1 }}>
+    <div className="grid grid-cols-[280px_1fr_420px] h-full">
+      <div className="border-r overflow-auto bg-white">
+        <div className="p-2 flex gap-2 sticky top-0 bg-white border-b">
+          <select className="flex-1 border rounded px-2 py-1" value={selectedProjectId ?? ''} onChange={(e) => onSelectProject(e.target.value)}>
             {projectApi.projects.map((p: any) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
-          <button onClick={() => projectApi.createProject().then((p: any) => onSelectProject(p.id))}>New</button>
+          <button className="px-3 py-1 rounded bg-black text-white" onClick={() => projectApi.createProject().then((p: any) => onSelectProject(p.id))}>New</button>
         </div>
         <FileExplorer tree={tree} onSelect={(p) => setSelectedFilePath(p)} />
       </div>
-      <div style={{ display: 'grid', gridTemplateRows: '1fr 240px' }}>
+      <div className="grid grid-rows-[1fr_240px]">
         <CodeEditor filePath={selectedFilePath ?? ''} value={fileContent} onChange={setFileContent} onSave={onSave} />
         <AgentStatus />
       </div>
-      <div style={{ borderLeft: '1px solid #eee', display: 'grid', gridTemplateRows: '32px 1fr' }}>
-        <div style={{ borderBottom: '1px solid #eee', display: 'flex', gap: 8, padding: '4px 6px' }}>
+      <div className="border-l grid grid-rows-[40px_1fr] bg-white">
+        <div className="border-b flex gap-2 p-2">
           <Tab label="Chat" activeKey={mode} tabKey="chat" onClick={() => setMode('chat')} />
           <Tab label="Preview" activeKey={mode} tabKey="preview" onClick={() => setMode('preview')} />
         </div>
-        <div>
+        <div className="h-full">
           {mode === 'chat' && <ChatInterface selectedProjectId={selectedProjectId} />}
           {mode === 'preview' && selectedProjectId && (
             <PreviewPane projectId={selectedProjectId} projectApi={projectApi} />
