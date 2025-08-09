@@ -2,6 +2,7 @@ import React from 'react';
 let socket = null;
 const agentSubscribers = new Set();
 const fileSubscribers = new Set();
+let reconnectTimer = null;
 function ensureSocket() {
     if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING))
         return socket;
@@ -28,6 +29,14 @@ function ensureSocket() {
             for (const sub of fileSubscribers)
                 sub((prev) => [...prev, fe]);
         }
+    };
+    socket.onclose = () => {
+        if (reconnectTimer)
+            return;
+        reconnectTimer = setTimeout(() => {
+            reconnectTimer = null;
+            ensureSocket();
+        }, 1000);
     };
     return socket;
 }

@@ -13,6 +13,6 @@ COPY shared ./shared
 COPY --from=builder /app/frontend/dist ./backend/public
 WORKDIR /app/backend
 RUN npm ci --omit=dev
-EXPOSE 3001
+EXPOSE 8080
 CMD ["node", "server.js"]
 

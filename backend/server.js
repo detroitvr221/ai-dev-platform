@@ -18,7 +18,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
 const WEBSOCKET_PORT = process.env.WEBSOCKET_PORT ? Number(process.env.WEBSOCKET_PORT) : undefined;
 
 const projectsRoot = process.env.PROJECTS_DIR
@@ -127,6 +127,17 @@ wss.on('connection', (ws) => {
       }
     } catch (err) {
       console.error('WS message error', err);
+      if (ws.readyState === ws.OPEN) {
+        ws.send(
+          JSON.stringify({
+            type: 'agent_update',
+            id: `orchestrator-${Date.now()}`,
+            agent: 'orchestrator',
+            status: 'error',
+            message: err?.message || 'Unknown error',
+          })
+        );
+      }
     }
   });
 

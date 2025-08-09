@@ -6,6 +6,7 @@ type FileEvent = { type?: 'file_event'; event: string; projectId: string; filePa
 let socket: WebSocket | null = null;
 const agentSubscribers = new Set<React.Dispatch<React.SetStateAction<AgentUpdate[]>>>();
 const fileSubscribers = new Set<React.Dispatch<React.SetStateAction<FileEvent[]>>>();
+let reconnectTimer: any = null;
 
 function ensureSocket() {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return socket;
@@ -29,6 +30,13 @@ function ensureSocket() {
       const fe: FileEvent = { type: 'file_event', event: msg.event, projectId: msg.projectId, filePath: msg.filePath };
       for (const sub of fileSubscribers) sub((prev) => [...prev, fe]);
     }
+  };
+  socket.onclose = () => {
+    if (reconnectTimer) return;
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      ensureSocket();
+    }, 1000);
   };
   return socket;
 }

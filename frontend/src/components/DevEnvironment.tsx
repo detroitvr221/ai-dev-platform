@@ -13,6 +13,7 @@ export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi 
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState('');
   const [tree, setTree] = useState<any[]>([]);
+  const [mode, setMode] = useState<'chat' | 'preview'>('chat');
 
   useEffect(() => {
     if (!selectedProjectId) return;
@@ -47,14 +48,37 @@ export function DevEnvironment({ selectedProjectId, onSelectProject, projectApi 
         <CodeEditor filePath={selectedFilePath ?? ''} value={fileContent} onChange={setFileContent} onSave={onSave} />
         <AgentStatus />
       </div>
-      <div style={{ borderLeft: '1px solid #eee' }}>
-        {selectedProjectId ? (
-          <PreviewPane projectId={selectedProjectId} projectApi={projectApi} />
-        ) : (
-          <ChatInterface selectedProjectId={selectedProjectId} />
-        )}
+      <div style={{ borderLeft: '1px solid #eee', display: 'grid', gridTemplateRows: '32px 1fr' }}>
+        <div style={{ borderBottom: '1px solid #eee', display: 'flex', gap: 8, padding: '4px 6px' }}>
+          <Tab label="Chat" activeKey={mode} tabKey="chat" onClick={() => setMode('chat')} />
+          <Tab label="Preview" activeKey={mode} tabKey="preview" onClick={() => setMode('preview')} />
+        </div>
+        <div>
+          {mode === 'chat' && <ChatInterface selectedProjectId={selectedProjectId} />}
+          {mode === 'preview' && selectedProjectId && (
+            <PreviewPane projectId={selectedProjectId} projectApi={projectApi} />
+          )}
+        </div>
       </div>
     </div>
+  );
+}
+
+function Tab({ label, activeKey, tabKey, onClick }: { label: string; activeKey: string; tabKey: string; onClick: () => void }) {
+  const active = activeKey === tabKey;
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '4px 8px',
+        borderRadius: 4,
+        background: active ? '#111' : 'transparent',
+        color: active ? '#fff' : '#111',
+        border: '1px solid #eee'
+      }}
+    >
+      {label}
+    </button>
   );
 }
 
