@@ -6,7 +6,7 @@ export class BaseAgent {
     this.role = role;
     this.systemPrompt = systemPrompt;
     this.model = model;
-    this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    this.client = null; // Lazy init to avoid crashing server when no API key is set
     this.memories = new Map(); // key: conversationId or projectId -> messages[]
   }
 
@@ -26,6 +26,13 @@ export class BaseAgent {
   }
 
   async sendMessage(message, context = {}) {
+    if (!this.client) {
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error('OPENAI_API_KEY is not set. Configure it in environment to enable agent responses.');
+      }
+      this.client = new OpenAI({ apiKey });
+    }
     const msgs = this._getMessages(context);
     msgs.push({ role: 'user', content: message });
     const response = await this.client.chat.completions.create({

@@ -7,9 +7,13 @@ const subscribers = new Set<React.Dispatch<React.SetStateAction<Update[]>>>();
 
 function ensureSocket() {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return socket;
+  const env: any = (import.meta as any).env || {};
+  const overrideUrl = env.VITE_WS_URL as string | undefined;
   const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
-  let wsUrl = `ws://localhost:${(import.meta as any).env?.VITE_WS_PORT || 3002}`;
-  if (isProd) {
+  let wsUrl = `ws://localhost:${env.VITE_WS_PORT || 3002}`;
+  if (overrideUrl) {
+    wsUrl = overrideUrl;
+  } else if (isProd) {
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     wsUrl = `${protocol}://${window.location.host}`;
   }

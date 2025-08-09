@@ -74,6 +74,17 @@ app.post('/api/projects/:projectId/file', async (req, res) => {
 // Serve frontend build if present (for production/preview)
 const staticDir = path.resolve(__dirname, './public');
 app.use(express.static(staticDir));
+// Fallback: serve index.html if exists; otherwise show hint
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  const indexPath = path.join(staticDir, 'index.html');
+  import('fs').then(({ default: fs }) => {
+    fs.access(indexPath, (err) => {
+      if (!err) return res.sendFile(indexPath);
+      return res.status(200).send('Backend is running. In development use http://localhost:5173 for the frontend.');
+    });
+  });
+});
 
 const httpServer = app.listen(PORT, () => {
   console.log(`HTTP listening on http://localhost:${PORT}`);
