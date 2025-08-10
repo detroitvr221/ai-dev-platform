@@ -32,3 +32,6 @@ WebSocket: ws://localhost:3002
 - Agents output files using triple-fenced blocks starting with `file:/path`. The orchestrator writes them into the project.
 - Basic project management APIs: list/create projects, read/write files, tree listing.
 
+## Monaco No‑Code Editor Review
+See `frontend/MONACO_EDITOR_REVIEW.md` for a gap analysis and an implementation plan to build the requested Monaco-based no-code editor (VFS, tabs, preview assembly, dependencies panel, browser persistence, and tests).
+

@@ -4,8 +4,12 @@ export function useProject() {
   const [projects, setProjects] = React.useState<any[]>([]);
 
   const refreshProjects = async () => {
-    const res = await fetch('/api/projects');
-    setProjects(await res.json());
+    try {
+      const res = await fetch('/api/projects', { cache: 'no-store' });
+      setProjects(await res.json());
+    } catch {
+      setProjects([]);
+    }
   };
 
   const createProject = async (name?: string) => {
@@ -31,6 +35,14 @@ export function useProject() {
     await fetch(`/api/projects/${projectId}/file`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filePath, content }) });
   };
 
-  return { projects, refreshProjects, createProject, fetchTree, readFile, writeFile };
+  const uploadFiles = async (projectId: string, files: File[], baseDir?: string) => {
+    const form = new FormData();
+    for (const f of files) form.append('files', f);
+    if (baseDir) form.append('baseDir', baseDir);
+    const res = await fetch(`/api/projects/${projectId}/upload`, { method: 'POST', body: form });
+    return res.json();
+  };
+
+  return { projects, refreshProjects, createProject, fetchTree, readFile, writeFile, uploadFiles };
 }
 

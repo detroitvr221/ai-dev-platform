@@ -10,9 +10,15 @@
     "port": 8080
   },
   "envs": {
+    "NODE_ENV": { "value": "production" },
     "OPENAI_API_KEY": { "required": true },
+    "OPENAI_MODEL": { "value": "gpt-4o-mini" },
+    "OPENAI_PROJECT": { "required": false },
     "PORT": { "value": "8080" },
-    "PROJECTS_DIR": { "value": "/data/projects" }
+    "PROJECTS_DIR": { "value": "/data/projects" },
+    "CORS_ORIGIN": { "value": "*" },
+    "ENABLE_HTTPS": { "value": "true" },
+    "BODY_LIMIT": { "value": "5mb" }
   },
   "volumes": [
     { "name": "data", "mountPath": "/data" }

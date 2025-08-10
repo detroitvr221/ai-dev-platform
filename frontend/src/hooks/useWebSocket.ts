@@ -8,6 +8,17 @@ const agentSubscribers = new Set<React.Dispatch<React.SetStateAction<AgentUpdate
 const fileSubscribers = new Set<React.Dispatch<React.SetStateAction<FileEvent[]>>>();
 let reconnectTimer: any = null;
 
+function dispatchItem(msg: any) {
+  if (msg.type === 'agent_update') {
+    for (const sub of agentSubscribers)
+      sub((prev) => [...prev, { agent: msg.agent, status: msg.status, message: msg.message, data: msg.data }]);
+  }
+  if (msg.type === 'file_event') {
+    const fe: FileEvent = { type: 'file_event', event: msg.event, projectId: msg.projectId, filePath: msg.filePath };
+    for (const sub of fileSubscribers) sub((prev) => [...prev, fe]);
+  }
+}
+
 function ensureSocket() {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return socket;
   const env: any = (import.meta as any).env || {};
@@ -23,13 +34,11 @@ function ensureSocket() {
   socket = new WebSocket(wsUrl);
   socket.onmessage = (event) => {
     const msg = JSON.parse(event.data);
-    if (msg.type === 'agent_update') {
-      for (const sub of agentSubscribers) sub((prev) => [...prev, { agent: msg.agent, status: msg.status, message: msg.message, data: msg.data }]);
+    if (msg.type === 'batch' && Array.isArray(msg.items)) {
+      for (const item of msg.items) dispatchItem(item);
+      return;
     }
-    if (msg.type === 'file_event') {
-      const fe: FileEvent = { type: 'file_event', event: msg.event, projectId: msg.projectId, filePath: msg.filePath };
-      for (const sub of fileSubscribers) sub((prev) => [...prev, fe]);
-    }
+    dispatchItem(msg);
   };
   socket.onclose = () => {
     if (reconnectTimer) return;

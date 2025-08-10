@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/agents/code/route": "app/api/agents/code/route.js",
+  "/api/agents/plan/route": "app/api/agents/plan/route.js",
+  "/api/agents/test/route": "app/api/agents/test/route.js",
+  "/api/agents/ui/route": "app/api/agents/ui/route.js",
+  "/api/fs/patch/route": "app/api/fs/patch/route.js",
+  "/api/fs/file/route": "app/api/fs/file/route.js",
+  "/api/fs/tree/route": "app/api/fs/tree/route.js",
+  "/page": "app/page.js",
+  "/api/events/route": "app/api/events/route.js"
+}

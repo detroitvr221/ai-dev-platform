@@ -7,8 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, '../shared')
-    }
+    },
+    dedupe: ['react', 'react-dom']
   },
+  build: { sourcemap: true },
   server: {
     port: 5173,
     proxy: {
