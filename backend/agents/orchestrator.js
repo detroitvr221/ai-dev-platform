@@ -4,6 +4,7 @@ import { BackendAgent } from './backendAgent.js';
 import { DatabaseAgent } from './databaseAgent.js';
 import { TestingAgent } from './testingAgent.js';
 import { DevopsAgent } from './devopsAgent.js';
+import { AssetsAgent } from './assetsAgent.js';
 import promptsPkg from '../../shared/prompts/agents.js';
 const { agentSystemPrompts } = promptsPkg;
 
@@ -17,6 +18,7 @@ export class AgentOrchestrator {
       database: new DatabaseAgent({ systemPrompt: agentSystemPrompts.database, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
       testing: new TestingAgent({ systemPrompt: agentSystemPrompts.testing, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
       devops: new DevopsAgent({ systemPrompt: agentSystemPrompts.devops, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
+      assets: new AssetsAgent({ systemPrompt: agentSystemPrompts.assets, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
     };
   }
 
@@ -66,6 +68,8 @@ export class AgentOrchestrator {
       await this._runAgentThatMayWriteFiles('testing', message, context, sendUpdate);
     } else if (intent === 'devops') {
       await this._runAgentThatMayWriteFiles('devops', message, context, sendUpdate);
+    } else if (intent === 'assets') {
+      await this._runAgentThatMayWriteFiles('assets', message, context, sendUpdate);
     } else {
       // Mixed/unsure: run frontend then backend
       await this._runAgentThatMayWriteFiles('frontend', message, context, sendUpdate);
@@ -81,6 +85,7 @@ export class AgentOrchestrator {
     if (/(db|database|schema|migration|sql|prisma)/.test(text)) return 'database';
     if (/(test|jest|coverage|integration)/.test(text)) return 'testing';
     if (/(deploy|docker|ci|cd|pipeline|infrastructure)/.test(text)) return 'devops';
+    if (/(design|brand|logo|icon|illustration|animation|visual|asset|graphic|color|typography)/.test(text)) return 'assets';
     return 'mixed';
   }
 

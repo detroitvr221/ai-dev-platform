@@ -1,5 +1,23 @@
 import React from 'react';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { AgentUpdate } from '../../shared/types';
+import { MessageSquare, Code, Database, FlaskConical, Cloud, Lightbulb, CheckCircle, XCircle, Loader2, Palette } from 'lucide-react';
+
+interface AgentStatusProps {
+  agentUpdates: AgentUpdate[];
+}
+
+const getAgentIcon = (agentName: string) => {
+  switch (agentName) {
+    case 'planning': return <Lightbulb className="w-5 h-5 text-yellow-400" />;
+    case 'frontend': return <Code className="w-5 h-5 text-blue-400" />;
+    case 'backend': return <MessageSquare className="w-5 h-5 text-green-400" />;
+    case 'database': return <Database className="w-5 h-5 text-purple-400" />;
+    case 'testing': return <FlaskConical className="w-5 h-5 text-red-400" />;
+    case 'devops': return <Cloud className="w-5 h-5 text-teal-400" />;
+    case 'assets': return <Palette className="w-5 h-5 text-pink-400" />;
+    default: return <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />;
+  }
+};
 
 export function AgentStatus() {
   const { agentUpdates, fileEvents } = useWebSocket();
