@@ -5,7 +5,7 @@ export class BaseAgent {
     this.name = name;
     this.role = role;
     this.systemPrompt = systemPrompt;
-    this.model = model || process.env.OPENAI_MODEL || 'gpt-5-nano';
+    this.model = model || process.env.OPENAI_MODEL || 'gpt-4o-mini';
     this.client = null; // Lazy init to avoid crashing server when no API key is set
     this.memories = new Map(); // key: conversationId or projectId -> messages[]
   }
@@ -38,12 +38,23 @@ export class BaseAgent {
     let lastErr = null;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const response = await this.client.chat.completions.create({
+        // Prepare parameters based on model type
+        const params = {
           model: this.model,
           messages: msgs,
-          temperature: Number(process.env.OPENAI_TEMPERATURE || 0.2),
-          max_tokens: Number(process.env.OPENAI_MAX_TOKENS || 2000)
-        });
+          temperature: Number(process.env.OPENAI_TEMPERATURE || 0.2)
+        };
+
+        // Use appropriate token parameter based on model
+        if (this.model.includes('gpt-4o') || this.model.includes('gpt-4o-mini')) {
+          // Newer models use max_completion_tokens
+          params.max_completion_tokens = Number(process.env.OPENAI_MAX_TOKENS || 2000);
+        } else {
+          // Older models use max_tokens
+          params.max_tokens = Number(process.env.OPENAI_MAX_TOKENS || 2000);
+        }
+
+        const response = await this.client.chat.completions.create(params);
         const assistantMessage = response.choices?.[0]?.message?.content || '';
         this._pushMessage(context, 'assistant', assistantMessage);
         return this._normalizeResponse(assistantMessage);

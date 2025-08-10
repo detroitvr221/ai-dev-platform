@@ -11,12 +11,12 @@ export class AgentOrchestrator {
   constructor({ projectManager }) {
     this.projectManager = projectManager;
     this.agents = {
-      planning: new PlanningAgent({ systemPrompt: agentSystemPrompts.planning, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
-      frontend: new FrontendAgent({ systemPrompt: agentSystemPrompts.frontend, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
-      backend: new BackendAgent({ systemPrompt: agentSystemPrompts.backend, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
-      database: new DatabaseAgent({ systemPrompt: agentSystemPrompts.database, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
-      testing: new TestingAgent({ systemPrompt: agentSystemPrompts.testing, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
-      devops: new DevopsAgent({ systemPrompt: agentSystemPrompts.devops, model: process.env.OPENAI_MODEL || 'gpt-5-nano' }),
+      planning: new PlanningAgent({ systemPrompt: agentSystemPrompts.planning, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
+      frontend: new FrontendAgent({ systemPrompt: agentSystemPrompts.frontend, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
+      backend: new BackendAgent({ systemPrompt: agentSystemPrompts.backend, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
+      database: new DatabaseAgent({ systemPrompt: agentSystemPrompts.database, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
+      testing: new TestingAgent({ systemPrompt: agentSystemPrompts.testing, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
+      devops: new DevopsAgent({ systemPrompt: agentSystemPrompts.devops, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }),
     };
   }
 
